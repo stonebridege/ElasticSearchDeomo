@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: search-service
+heima:
+  elasticsearch:
+    hostlist: 192.168.234.100:9200 #?????????
