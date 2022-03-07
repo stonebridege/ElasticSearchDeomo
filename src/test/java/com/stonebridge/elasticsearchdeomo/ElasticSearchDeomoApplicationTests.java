@@ -2,6 +2,9 @@ package com.stonebridge.elasticsearchdeomo;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -238,5 +241,39 @@ class ElasticSearchDeomoApplicationTests {
 
         DocWriteResponse.Result result = deleteResponse.getResult();
         System.out.println(result);
+    }
+
+    @Test
+    public void testBulk() throws IOException {
+        //创建请求
+        BulkRequest bulkRequest = new BulkRequest();
+
+//        bulkRequest.add(new IndexRequest("test_post").id("100").source(XContentType.JSON, "field", 1));
+//        bulkRequest.add(new IndexRequest("test_post").id("200").source(XContentType.JSON, "field", 2));
+
+        bulkRequest.add(new UpdateRequest("test_post", "100").doc(XContentType.JSON, "field", "3"));
+        bulkRequest.add(new DeleteRequest("test_post").id("200"));
+
+        //执行
+        BulkResponse bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+        for (BulkItemResponse itemResponse : bulk) {
+            DocWriteResponse itemResponseResponse = itemResponse.getResponse();
+            switch (itemResponse.getOpType()) {
+                case INDEX:
+                case CREATE:
+                    IndexResponse indexResponse = (IndexResponse) itemResponseResponse;
+                    System.out.println(indexResponse.getResult());
+                    break;
+                case UPDATE:
+                    UpdateResponse updateResponse = (UpdateResponse) itemResponseResponse;
+                    updateResponse.getIndex();
+                    System.out.println(updateResponse.getResult());
+                    break;
+                case DELETE:
+                    DeleteResponse deleteResponse = (DeleteResponse) itemResponseResponse;
+                    System.out.println(deleteResponse.getResult());
+                    break;
+            }
+        }
     }
 }
