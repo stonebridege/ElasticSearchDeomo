@@ -7,6 +7,8 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.Strings;
@@ -182,6 +184,44 @@ class ElasticSearchDeomoApplicationTests {
                 String reason = failure.reason();//处理潜在的失败原因
                 System.out.println(reason);
             }
+        }
+    }
+
+    @Test
+    public void testUpadate() throws IOException {
+        //1.创建请求
+        UpdateRequest updateRequest = new UpdateRequest("test_post", "3");
+        //2.构建文档
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("user", "tomas Lee1");
+        updateRequest.doc(jsonMap);
+        //3.可选参数
+        updateRequest.timeout(TimeValue.timeValueSeconds(1));
+        updateRequest.retryOnConflict(3);
+        //private boolean docAsUpsert = false; 是否使用saveOrUpdate模式，即是否使用IndexRequest upsertRequest进行更新操作。(docAsUpser=true+ doc组合，将使用saveOrUpdate模式)。
+        updateRequest.docAsUpsert(true);
+
+        //4.执行
+        UpdateResponse updateResponse = client.update(updateRequest, RequestOptions.DEFAULT);
+
+        //5/获取参数
+        System.out.println(updateResponse.getId());
+        System.out.println(updateResponse.getIndex());
+        //6.判断结果
+        //判断结果
+        if (updateResponse.getResult() == DocWriteResponse.Result.CREATED) {
+            DocWriteResponse.Result result = updateResponse.getResult();
+            System.out.println("CREATED:" + result);
+        } else if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED) {
+            DocWriteResponse.Result result = updateResponse.getResult();
+            System.out.println("UPDATED:" + result);
+        } else if (updateResponse.getResult() == DocWriteResponse.Result.DELETED) {
+            DocWriteResponse.Result result = updateResponse.getResult();
+            System.out.println("DELETED:" + result);
+        } else if (updateResponse.getResult() == DocWriteResponse.Result.NOOP) {
+            //没有操作
+            DocWriteResponse.Result result = updateResponse.getResult();
+            System.out.println("NOOP:" + result);
         }
     }
 }
