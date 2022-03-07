@@ -2,6 +2,8 @@ package com.stonebridge.elasticsearchdeomo;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -13,10 +15,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.VersionType;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +79,7 @@ class ElasticSearchDeomoApplicationTests {
     }
 
     @Test
-    public void testGet2() throws IOException {
+    public void testGet2() {
         //1.构建请求
         GetRequest getRequest = new GetRequest("test_post", "1");
         //异步查询
@@ -223,5 +222,21 @@ class ElasticSearchDeomoApplicationTests {
             DocWriteResponse.Result result = updateResponse.getResult();
             System.out.println("NOOP:" + result);
         }
+    }
+
+    @Test
+    public void testDelete() throws IOException {
+        //1.构建请求
+        DeleteRequest request = new DeleteRequest("test_post", "5");
+        //可选参数
+
+        //2.执行
+        DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+
+        //3.获取数据
+        deleteResponse.getIndex();
+
+        DocWriteResponse.Result result = deleteResponse.getResult();
+        System.out.println(result);
     }
 }
